@@ -50,14 +50,14 @@
 			becomeMsgPage('<div>' . $errmsg . '</div><a href="/problem/'.$problem['id'].'/manage/data">返回</a>');
 		} else {
 			$zip_mime_types = array('application/zip', 'application/x-zip', 'application/x-zip-compressed');
-			if (in_array($_FILES["problem_data_file"]["type"], $zip_mime_types)) {
+			if (in_array($_FILES["problem_data_file"]["type"], $zip_mime_types) || $_FILES["problem_data_file"]["type"] == 'application/octet-stream' && substr($_FILES["problem_data_file"]["name"], -4) == '.zip') {
 				$up_filename="/tmp/".rand(0,100000000)."data.zip";
 				move_uploaded_file($_FILES["problem_data_file"]["tmp_name"], $up_filename);
 				$zip = new ZipArchive;
 				if ($zip->open($up_filename) === TRUE) {
 					$zip->extractTo("/var/uoj_data/upload/{$problem['id']}");
 					$zip->close();
-					exec("cd /var/uoj_data/upload/{$problem['id']}; if [ `find . -maxdepth 1 -type f`File = File ]; then for sub_dir in `find -maxdepth 1 -type d ! -name .`; do mv -f \$sub_dir/* . && rm -rf \$sub_dir; done; fi");
+					exec("cd /var/uoj_data/upload/{$problem['id']}; if [ -z \"`find . -maxdepth 1 -type f`\" ]; then for sub_dir in `find -maxdepth 1 -type d ! -name .`; do mv -f \$sub_dir/* . && rm -rf \$sub_dir; done; fi");
 					echo "<script>alert('上传成功！')</script>";
 				} else {
 					$errmsg = "解压失败！";
@@ -316,8 +316,21 @@ EOD
 
 		$getDisplaySrcFunc = function($name) use ($allow_files) {
 			return function() use ($name, $allow_files) {
-				$src_name = $name . '.cpp';
-				if (isset($allow_files[$src_name])) {
+				$findSourceFile = function($name) use ($allow_files) {
+					$found = false;
+					foreach (array_keys($allow_files) as $file_name) {
+						if (strpos($file_name, $name) === 0) {
+							$rest = substr($file_name, strlen($name));
+							if (strlen($rest) > 0 && ($rest[0] === '.' || is_numeric($rest[0]))) {
+								return $file_name;
+							}
+						}
+					}
+					return null;
+				};
+
+				$src_name = $findSourceFile($name);
+				if (isset($src_name)) {
 					echoFilePre($src_name);
 				} else {
 					echoFileNotFound($src_name);
@@ -559,7 +572,7 @@ EOD
 			
 			$requirement = json_decode($problem['submission_requirement'], true);
 			
-			$zip_file_name = uojRandAvaiableSubmissionFileName();
+			$zip_file_name = uojRandAvailableSubmissionFileName();
 			$zip_file = new ZipArchive();
 			if ($zip_file->open(UOJContext::storagePath().$zip_file_name, ZipArchive::CREATE) !== true) {
 				becomeMsgPage('提交失败');

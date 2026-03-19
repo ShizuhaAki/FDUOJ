@@ -49,7 +49,7 @@
 				}
 			}
 			
-			$fileName = uojRandAvaiableTmpFileName();
+			$fileName = uojRandAvailableTmpFileName();
 			$fileFullName = UOJContext::storagePath().$fileName;
 			if ($_POST["input_upload_type"] == 'editor') {
 				file_put_contents($fileFullName, $_POST['input_editor']);
@@ -126,7 +126,7 @@
 	}
 ?>
 <?php 
-	$REQUIRE_LIB['shjs'] = "";
+	$REQUIRE_LIB['hljs'] = "";
 ?>
 <?php echoUOJPageHeader(UOJLocale::get('problems::submission').' #'.$submission['id']) ?>
 <?php echoSubmissionsListOnlyOne($submission, array(), $myUser) ?>

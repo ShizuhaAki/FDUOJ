@@ -28,6 +28,7 @@ Route::group([
 		Route::any('/contest/{id}/submissions', '/contest_inside.php?tab=submissions');
 		Route::any('/contest/{id}/standings', '/contest_inside.php?tab=standings');
 		Route::any('/contest/{id}/backstage', '/contest_inside.php?tab=backstage');
+		Route::any('/contest/{id}/export_standings', '/export_contest_standings_table.php');
 		Route::any('/contest/{contest_id}/problem/{id}', '/problem.php');
 		Route::any('/contest/{contest_id}/problem/{id}/statistics', '/problem_statistics.php');
 		
@@ -64,6 +65,11 @@ Route::group([
 		Route::any('/download.php', '/download.php');
 		
 		Route::any('/click-zan', '/click_zan.php');
+
+		Route::any('/paste', '/paste_post.php');
+		Route::any('/pastes/{rand_str_id}', '/paste_view.php');
+
+		Route::any('/map_visualizer', '/map_visualizer.php');
 	}
 );
 
